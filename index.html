@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>影修工坊｜在线修图工具</title>
+  <meta name="description" content="影修工坊是一个本地运行的在线修图工具，支持上传、裁剪、旋转、翻转、亮度、对比度、饱和度、色温、锐化、文字和水印导出。">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="./index.html" aria-label="影修工坊首页">
+        <span>影修</span>
+        <b>工坊</b>
+      </a>
+      <div class="topbar-actions">
+        <label class="file-button" for="imageInput">上传图片</label>
+        <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp" hidden>
+        <button id="undoButton" type="button">撤销</button>
+        <button id="resetButton" type="button">重置</button>
+        <button id="downloadButton" class="primary-button" type="button">下载成品</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="tool-panel" aria-label="修图工具">
+        <section class="panel-section">
+          <div class="section-title">
+            <p>PRESETS</p>
+            <h2>快速风格</h2>
+          </div>
+          <div class="preset-grid">
+            <button type="button" data-preset="clean">清透</button>
+            <button type="button" data-preset="portrait">人像</button>
+            <button type="button" data-preset="warm">暖调</button>
+            <button type="button" data-preset="cool">冷调</button>
+            <button type="button" data-preset="mono">黑白</button>
+            <button type="button" data-preset="film">胶片</button>
+          </div>
+        </section>
+
+        <section class="panel-section">
+          <div class="section-title">
+            <p>ADJUST</p>
+            <h2>基础调节</h2>
+          </div>
+          <div class="slider-list">
+            <label>
+              <span>亮度 <b id="brightnessValue">0</b></span>
+              <input id="brightness" type="range" min="-100" max="100" value="0">
+            </label>
+            <label>
+              <span>对比度 <b id="contrastValue">0</b></span>
+              <input id="contrast" type="range" min="-100" max="100" value="0">
+            </label>
+            <label>
+              <span>饱和度 <b id="saturationValue">0</b></span>
+              <input id="saturation" type="range" min="-100" max="100" value="0">
+            </label>
+            <label>
+              <span>色温 <b id="temperatureValue">0</b></span>
+              <input id="temperature" type="range" min="-100" max="100" value="0">
+            </label>
+            <label>
+              <span>锐化 <b id="sharpnessValue">0</b></span>
+              <input id="sharpness" type="range" min="0" max="100" value="0">
+            </label>
+          </div>
+          <button id="applyAdjustmentsButton" type="button" class="wide-button">应用当前调节</button>
+        </section>
+
+        <section class="panel-section">
+          <div class="section-title">
+            <p>CROP</p>
+            <h2>裁剪与构图</h2>
+          </div>
+          <div class="control-row">
+            <label for="aspectRatio">比例</label>
+            <select id="aspectRatio">
+              <option value="free">自由</option>
+              <option value="1:1">1:1</option>
+              <option value="4:3">4:3</option>
+              <option value="3:4">3:4</option>
+              <option value="16:9">16:9</option>
+              <option value="9:16">9:16</option>
+            </select>
+          </div>
+          <div class="button-row">
+            <button id="startCropButton" type="button">框选裁剪</button>
+            <button id="applyCropButton" type="button">应用裁剪</button>
+          </div>
+          <p class="hint">点击“框选裁剪”后，在图片上拖拽选择区域。</p>
+        </section>
+
+        <section class="panel-section">
+          <div class="section-title">
+            <p>TRANSFORM</p>
+            <h2>旋转与翻转</h2>
+          </div>
+          <div class="button-grid">
+            <button id="rotateLeftButton" type="button">左转90</button>
+            <button id="rotateRightButton" type="button">右转90</button>
+            <button id="flipXButton" type="button">水平翻转</button>
+            <button id="flipYButton" type="button">垂直翻转</button>
+          </div>
+        </section>
+      </aside>
+
+      <section class="canvas-stage" aria-label="图片预览区">
+        <div id="dropZone" class="drop-zone">
+          <div class="stage-header">
+            <div>
+              <p>LOCAL EDITOR</p>
+              <h1>本地修图，不上传服务器</h1>
+            </div>
+            <span id="imageInfo">示例图像 1600 x 1000</span>
+          </div>
+          <div id="canvasWrap" class="canvas-wrap">
+            <canvas id="previewCanvas" width="1600" height="1000"></canvas>
+            <div id="cropBox" class="crop-box" hidden></div>
+          </div>
+          <p class="stage-note">图片在浏览器本地处理。下载前不会自动上传到任何服务器。</p>
+        </div>
+      </section>
+
+      <aside class="export-panel" aria-label="文字水印与导出">
+        <section class="panel-section">
+          <div class="section-title">
+            <p>TEXT</p>
+            <h2>文字与水印</h2>
+          </div>
+          <label class="stack-field">
+            <span>文字内容</span>
+            <input id="textContent" type="text" value="Photo Studio">
+          </label>
+          <div class="two-columns">
+            <label class="stack-field">
+              <span>字号</span>
+              <input id="textSize" type="number" min="12" max="220" value="48">
+            </label>
+            <label class="stack-field">
+              <span>颜色</span>
+              <input id="textColor" type="color" value="#ffffff">
+            </label>
+          </div>
+          <div class="two-columns">
+            <label class="stack-field">
+              <span>X位置%</span>
+              <input id="textX" type="number" min="0" max="100" value="50">
+            </label>
+            <label class="stack-field">
+              <span>Y位置%</span>
+              <input id="textY" type="number" min="0" max="100" value="88">
+            </label>
+          </div>
+          <button id="addTextButton" type="button" class="wide-button">添加到图片</button>
+        </section>
+
+        <section class="panel-section">
+          <div class="section-title">
+            <p>EXPORT</p>
+            <h2>导出设置</h2>
+          </div>
+          <label class="stack-field">
+            <span>文件名</span>
+            <input id="fileName" type="text" value="edited-photo">
+          </label>
+          <div class="control-row">
+            <label for="exportFormat">格式</label>
+            <select id="exportFormat">
+              <option value="image/png">PNG</option>
+              <option value="image/jpeg">JPG</option>
+              <option value="image/webp">WebP</option>
+            </select>
+          </div>
+          <label class="stack-field">
+            <span>质量 <b id="qualityValue">92</b>%</span>
+            <input id="exportQuality" type="range" min="40" max="100" value="92">
+          </label>
+          <button id="downloadButtonSide" type="button" class="primary-button wide-button">下载成品</button>
+        </section>
+
+        <section class="panel-section summary-section">
+          <div class="section-title">
+            <p>WORKFLOW</p>
+            <h2>当前流程</h2>
+          </div>
+          <ul id="historyList"></ul>
+        </section>
+      </aside>
+    </main>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>
